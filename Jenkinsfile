@@ -13,15 +13,13 @@ pipeline {
             steps {
                 echo "Fetching the source code from: $CODE_DIRECTORY"
                 echo "Compiling the code and generating artifacts"
-                // Add actual build steps here
-            }
+                }
         }
         stage('Unit and Integration Tests') {
             steps {
                 echo "Running unit tests"
                 echo "Running integration tests"
-                // Add actual test steps here
-            }
+                  }
             post {
                 success {
                     mail to: "${env.NOTIFICATION_EMAIL}",
@@ -40,14 +38,12 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 echo 'Checking the quality of the code'
-                // Add actual code quality check steps here
-            }
+              }
         }
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan'
-                // Add actual security scan steps here
-            }
+                }
             post {
                 success {
                     mail to: "${env.NOTIFICATION_EMAIL}",
@@ -66,20 +62,17 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo "Deploying the application to the $TEST_ENV environment"
-                // Add actual staging deployment steps here
-            }
+                }
         }
         stage('Integration Tests on Staging') {
             steps {
                 echo "Running integration tests on staging environment"
-                // Add actual integration tests on staging steps here
-            }
+                }
         }
         stage('Deploy to Production') {
             steps {
                 echo "Deploying the code to the $PROD_ENV environment"
-                // Add actual production deployment steps here
-            }
+                }
         }
     }
 
