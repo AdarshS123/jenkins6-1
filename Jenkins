@@ -1,0 +1,72 @@
+pipeline {
+    agent any
+
+    environment {
+        DIRECTORY_PATH = "/directory_path_code_directory"
+        TESTING_ENVIRONMENT = "Test Env"
+        PRODUCTION_ENVIRONMENT = "Prod Env"
+    }
+
+    stages {
+        stage('Build') { 
+            steps {
+                echo "Fetching the source code from: $CODE_DIRECTORY"
+                echo "Compiling the code and generating artifacts"
+            }
+        }
+        stage('Unit and Integration Tests') { 
+            steps {
+                echo "Running unit tests"
+                echo "Running integration tests"
+                emailext (
+                    subject: "Jenkins Build ${env.BUILD_NUMBER} - Test Stage ${currentBuild.result}",
+                    body: "The Test stage of build ${env.BUILD_NUMBER} has completed with status: SUCCESS.",
+                    to: 'adarshkrishs1999@gmail.com',
+                    attachLog: true
+                )
+            }
+        }
+        stage('Code Analysis') { 
+            steps {
+                echo 'Checking the quality of the code'
+                
+            }
+        }
+        stage('Security scan') { 
+            steps {
+                echo "Security scan using OWASP Dependency-Check plugin for checking project dependencies for vulnerabilities"
+                emailext (
+                    subject: "Jenkins Build ${env.BUILD_NUMBER} - Security Scan Stage ${currentBuild.result}",
+                    body: "The Security Scan stage of build ${env.BUILD_NUMBER} has completed with status: SUCCESS.",
+                    to: 'adarshkrishs1999@gmail.com',
+                    attachLog: true
+                )
+            }
+        }
+        stage('Deploy to Staging') { 
+            steps {
+                echo "Deploying the application to the $TEST_ENV environment"
+            }
+        }
+        stage('Integration Tests on Staging') { 
+            steps {
+                echo "Running integration tests on staging environment"
+            }
+        }
+        stage('Deploy to production') {
+            steps {
+                echo "Deploying the code to the $PROD_ENV environment" 
+            }
+        }
+    }
+    post {
+        always {
+            emailext (
+                subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                        <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+                to: "adarshkrishs1999@gmail.com"
+            )
+        }
+    }
+}
