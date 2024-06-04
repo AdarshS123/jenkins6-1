@@ -2,99 +2,73 @@ pipeline {
     agent any
 
     environment {
-        CODE_DIRECTORY = "/path/to/code"
-        TEST_ENV = "testing"
-        PROD_ENV = "yourname_production"
-        NOTIFICATION_EMAIL = "adarshkrishs1999@gmail.com"
+        DIRECTORY_PATH = "/directory_path_code_directory"
+        TESTING_ENVIRONMENT = "Test Env"
+        PRODUCTION_ENVIRONMENT = "Prod Env"
     }
 
     stages {
-        stage('Build') {
+        stage('Build') { 
             steps {
-                echo "Fetching the source code from: $CODE_DIRECTORY"
-                echo "Compiling the code and generating artifacts"
+                echo "fetch the source code from the directory path specified by the environment variable"
+                echo "compile the code and generate any necessary artifacts"
             }
         }
-        stage('Unit and Integration Tests') {
+        stage('Unit and Integration Tests') { 
             steps {
-                echo "Running unit tests"
-                echo "Running integration tests"
-            }
-            post {
-                success {
-                    mail to: "${env.NOTIFICATION_EMAIL}",
-                         subject: "Unit and Integration Tests Passed",
-                         body: "Unit and Integration Tests have passed successfully. See attached logs for details.<br>Console Output: ${env.BUILD_URL}console",
-                         mimeType: 'text/html',
-                         attachLog: true
-                }
-                failure {
-                    mail to: "${env.NOTIFICATION_EMAIL}",
-                         subject: "Unit and Integration Tests Failed",
-                         body: "Unit and Integration Tests have failed. See attached logs for details.<br>Console Output: ${env.BUILD_URL}console",
-                         mimeType: 'text/html',
-                         attachLog: true
-                }
+                echo "unit tests"
+                echo "integration tests"
+                emailext (
+                    subject: "Jenkins Build ${env.BUILD_NUMBER} - Test Stage ${currentBuild.result}",
+                    body: "The Test stage of build ${env.BUILD_NUMBER} has completed with status: SUCCESS.",
+                    to: 'adarshkrishs1999@gmail.com',
+                    attachLog: true
+                )
             }
         }
-        stage('Code Analysis') {
+        stage('Code Analysis') { 
             steps {
-                echo 'Checking the quality of the code'
+                echo "check the quality of the code"
+                echo "Using sonarqube for checking code quality"
             }
         }
-        stage('Security Scan') {
+        stage('Security scan') { 
             steps {
-                echo 'Performing security scan'
-            }
-            post {
-                success {
-                    mail to: "${env.NOTIFICATION_EMAIL}",
-                         subject: "Security Scan Passed",
-                         body: "Security scan completed without any issues. See attached logs for details.<br>Console Output: ${env.BUILD_URL}console",
-                         mimeType: 'text/html',
-                         attachLog: true
-                }
-                failure {
-                    mail to: "${env.NOTIFICATION_EMAIL}",
-                         subject: "Security Scan Failed",
-                         body: "Security scan has some issues. See attached logs for details.<br>Console Output: ${env.BUILD_URL}console",
-                         mimeType: 'text/html',
-                         attachLog: true
-                }
+                echo "Security scan using OWASP Dependency-Check plugin for checking project dependencies for vulnerabilities"
+                emailext (
+                    subject: "Jenkins Build ${env.BUILD_NUMBER} - Security Scan Stage ${currentBuild.result}",
+                    body: "The Security Scan stage of build ${env.BUILD_NUMBER} has completed with status: SUCCESS.",
+                    to: 'adarshkrishs1999@gmail.com',
+                    attachLog: true
+                )
             }
         }
-        stage('Deploy to Staging') {
+        stage('Deploy') { 
             steps {
-                echo "Deploying the application to the $TEST_ENV environment"
+                echo "deploy the application to a testing/staging environment in an AWS EC2 instance"
+                echo "test environment: ${TESTING_ENVIRONMENT}"
             }
         }
-        stage('Integration Tests on Staging') {
+        stage('Integration Tests on Staging') { 
             steps {
                 echo "Running integration tests on staging environment"
+                echo "Tests complete"
             }
         }
-        stage('Deploy to Production') {
+        stage('Deploy to production') {
             steps {
-                echo "Deploying the code to the $PROD_ENV environment"
+                echo "Deploying to production environment: ${PRODUCTION_ENVIRONMENT}"
+                echo "Deployed to production!"
             }
         }
     }
-
     post {
         always {
             emailext (
-                subject: "Pipeline Status: ${currentBuild.result}",
-                body: '''<html>
-                    <body>
-                    <p>Build Status: ${currentBuild.result}</p>
-                    <p>Build Number: ${currentBuild.number}</p>
-                    <p>Console Output: <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
-                    </body>
-                    </html>''',
-                to: 'adarshkrishs1999@gmail.com',
-                from: 'jenkins@example.com',
-                replyTo: 'jenkins@example.com',
-                mimeType: 'text/html'
+                subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                        <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+                to: "adarshkrishs1999@gmail.com"
             )
         }
     }
