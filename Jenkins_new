@@ -5,7 +5,7 @@ pipeline {
         CODE_DIRECTORY = "/path/to/code"
         TEST_ENV = "testing"
         PROD_ENV = "yourname_production"
-        NOTIFICATION_EMAIL = "adarshkrishs1999@gmail.com"
+        NOTIFICATION_EMAIL = "adarshkrishs1999@gmail.com" 
     }
 
     stages {
